@@ -12,13 +12,22 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 ```
 
-## 실행방법
-* git clone으로 받아다가 실행해주면 됨
+## download
+* 실행 파일 다운로드
 ```
-% python3 ./granXi.py
+% wget -L https://raw.githubusercontent.com/byung-u/grangran/master/granXi.py
 ```
 
-* 다른 아파트를 보려면 `url` 정보만 바꿔주면 됨
+## execute
+* 단순 실행
+```
+% python3 granXi.py
+```
+
+* 실행 결과 클립보드 복사 (stdout to clipboard)
+```
+% python3 granXi.py | pbcopy
+```
 
 
 # 보여주는 내용
