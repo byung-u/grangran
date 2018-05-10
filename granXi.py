@@ -8,11 +8,14 @@ from selenium import webdriver
 
 def naver_realestate_remove_dups():
     sold_result = set()
+    temp_real = dict()
+    real_agent = set()
     result = set()
     print('네이버부동산')
     print('신촌그랑자이 매물')
     total_cnt = 0
 
+    # org_url = 'http://land.naver.com/article/articleList.nhn?rletTypeCd=B01&tradeTypeCd=&rletNo=114542&cortarNo=&hscpTypeCd=&mapX=&mapY=&mapLevel=&page=&articlePage=&ptpNo=&rltrId=&mnex=&bildNo=&articleOrderCode=&cpId=&period=&prodTab=&atclNo=&atclRletTypeCd=&location=536&bbs_tp_cd=&sort=&siteOrderCode=&schlCd=&tradYy=&exclsSpc=&splySpcR=&cmplYn='
     for i in count(1):
         hscpTypeCd = 'hscpTypeCd=B01%3AB02%3AB0'
         url = 'http://land.naver.com/article/articleList.nhn?rletTypeCd=B01&tradeTypeCd=&rletNo=114542&cortarNo=1144010800&%s3&mapX=&mapY=&mapLevel=&page=%d&articlePage=&ptpNo=&rltrId=&mnex=&bildNo=&articleOrderCode=&cpId=&period=&prodTab=&atclNo=&atclRletTypeCd=&location=2397&bbs_tp_cd=&sort=&siteOrderCode=&schlCd=&tradYy=&exclsSpc=&splySpcR=&cmplYn=#_content_list_target' % (hscpTypeCd, i)
@@ -56,6 +59,20 @@ def naver_realestate_remove_dups():
                         res = '%s' % td.text.strip()
                         temp = res.split('\n')
                         detail_info = '%s %s' % (detail_info, temp[0])
+                    if idx == 7:
+                        infos = '%s' % td.text.split()
+                        if infos.find(',') == -1:
+                            pos = infos.split('02')
+                            rname = '%s,' % pos[0][2:]
+                            info = '02%s' % pos[1]
+                            # if temp_real[info.replace('[', '').replace(']', '').replace("'", "")] is None:
+                            temp_real[info.replace('[', '').replace(']', '').replace("'", "")] = rname
+                            # real_info = '%s %s' % (rname, info.replace('[', '').replace(']', '').replace("'", ""))
+                        else:
+                            infos = '%s' % td.text.split()
+                            temp = infos.replace('[', '').replace(']', '').replace("'", "").split(',')
+                            temp_real[temp[1]] = temp[0].strip()
+                            # real_info = '%s' % (infos.replace('[', '').replace(']', '').replace("'", ""))
                 # print(is_sold)
                 # print(detail_info)
                 if detail_info is None:
@@ -72,17 +89,27 @@ def naver_realestate_remove_dups():
         total_cnt += cnt
     result = list(result)
     result = sorted(result)
-    print('[현재매물]-----------------')
+    print('\n[현재매물]-----------------')
     for r in result:
         print(r)
-    print('[거래완료]-----------------')
+    print('\n[거래완료]-----------------')
     sold_result = list(sold_result)
     sold_result = sorted(sold_result)
     for r in sold_result:
         print(r)
-    print("\n네이버 전체 매물 : ", total_cnt)
+    for r_phone, r_name in temp_real.items():
+        real_info = '%s, %s' % (r_name, r_phone.strip())
+        real_agent.add(real_info)
+    print('\n[공인중개사사무소]----------')
+    real_agent = list(real_agent)
+    real_agent = sorted(real_agent)
+    for r in real_agent:
+        print(r)
+    print('\n[Total]----------')
+    print("네이버 전체 매물 : ", total_cnt)
     print("현재매물: ", len(result))
     print("거래완료: ", len(sold_result))
+    print('공인중개사사무소: ', len(real_agent))
     sys.exit(1)
 
 
