@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import os
 import sys
 from bs4 import BeautifulSoup
 from itertools import count
 from selenium import webdriver
+from re import sub
+from decimal import Decimal, InvalidOperation
+
+chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
 
 
 def naver_realestate_remove_dups():
+    p_min, p_max = 0, 0
     sold_result = set()
     temp_real = dict()
     real_agent = set()
@@ -19,7 +25,8 @@ def naver_realestate_remove_dups():
     for i in count(1):
         hscpTypeCd = 'hscpTypeCd=B01%3AB02%3AB0'
         url = 'http://land.naver.com/article/articleList.nhn?rletTypeCd=B01&tradeTypeCd=&rletNo=114542&cortarNo=1144010800&%s3&mapX=&mapY=&mapLevel=&page=%d&articlePage=&ptpNo=&rltrId=&mnex=&bildNo=&articleOrderCode=&cpId=&period=&prodTab=&atclNo=&atclRletTypeCd=&location=2397&bbs_tp_cd=&sort=&siteOrderCode=&schlCd=&tradYy=&exclsSpc=&splySpcR=&cmplYn=#_content_list_target' % (hscpTypeCd, i)
-        driver = webdriver.PhantomJS()
+        driver = webdriver.Chrome(chromedriver_path)
+        # driver = webdriver.PhantomJS()
         driver.implicitly_wait(3)
         driver.get(url)
         html = driver.page_source
@@ -59,6 +66,18 @@ def naver_realestate_remove_dups():
                         res = '%s' % td.text.strip()
                         temp = res.split('\n')
                         detail_info = '%s %s' % (detail_info, temp[0])
+                        try:
+                            value = int(Decimal(sub(r'[^\d.]', '', res)))
+                            if p_min == 0:
+                                p_min = value
+                            if p_max == 0:
+                                p_max = value
+                            if p_min > value:
+                                p_min = value
+                            if p_max < value:
+                                p_max = value
+                        except InvalidOperation:
+                            continue
                     if idx == 7:
                         infos = '%s' % td.text.split()
                         if infos.find(',') == -1:
@@ -106,8 +125,10 @@ def naver_realestate_remove_dups():
     for r in real_agent:
         print(r)
     print('\n[Total]----------')
-    print("네이버 전체 매물 : ", total_cnt)
-    print("현재매물: ", len(result))
+    print("전체:", total_cnt)
+    print("중복:", total_cnt - len(result))
+    print("현재:", len(result))
+    print("가격:", p_min / 10000, "억 ~", p_max / 10000, "억")
     print("거래완료: ", len(sold_result))
     print('공인중개사사무소: ', len(real_agent))
     sys.exit(1)
