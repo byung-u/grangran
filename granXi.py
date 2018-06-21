@@ -82,15 +82,19 @@ def naver_realestate_remove_dups():
                         infos = '%s' % td.text.split()
                         if infos.find(',') == -1:
                             pos = infos.split('02')
+                            if len(pos) == 1:
+                                pos = pos[0].split('010')
                             rname = '%s,' % pos[0][2:]
                             info = '02%s' % pos[1]
                             # if temp_real[info.replace('[', '').replace(']', '').replace("'", "")] is None:
                             temp_real[info.replace('[', '').replace(']', '').replace("'", "")] = rname
+                            detail_info = '%s %s' % (detail_info, rname)
                             # real_info = '%s %s' % (rname, info.replace('[', '').replace(']', '').replace("'", ""))
                         else:
                             infos = '%s' % td.text.split()
                             temp = infos.replace('[', '').replace(']', '').replace("'", "").split(',')
                             temp_real[temp[1]] = temp[0].strip()
+                            detail_info = '%s %s' % (detail_info, temp[0].strip())
                             # real_info = '%s' % (infos.replace('[', '').replace(']', '').replace("'", ""))
                 # print(is_sold)
                 # print(detail_info)
